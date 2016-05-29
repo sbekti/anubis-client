@@ -1,0 +1,16 @@
+{
+  "name": "anubis-client",
+  "version": "0.0.1",
+  "description": "WebSocket client for Anubis Server",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sbekti/anubis-client.git"
+  },
+  "author": "Samudra Harapan Bekti",
+  "license": "MIT",
+  "homepage": "https://github.com/sbekti/anubis-client#readme",
+  "dependencies": {
+    "ws": "^1.1.0"
+  }
+}
