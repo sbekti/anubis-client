@@ -10,11 +10,7 @@ npm install --save anubis-client
 ~~~javascript
 var AnubisClient = require('anubis-client');
 
-var anubis = new AnubisClient({
-  server: 'wss://localhost:5443',
-  topics: ['fruits', 'cities'],
-  groupId: 'testgroup'
-});
+var anubis = new AnubisClient('wss://localhost:5443');
 
 // Only if using a self-signed certificate on the server.
 // Do not use this in production.
@@ -24,10 +20,12 @@ anubis.connect();
 
 anubis.on('open', function() {
   console.log('Connected to Anubis server');
-  
+
+  anubis.subscribe(['fruits', 'cities'], 'testgroup');
+
   anubis.publish('fruits', 'apple');
   anubis.publish('cities', 'San Francisco');
-  
+
   anubis.seek('fruits', 'beginning');
   // anubis.seek('fruits', 'end');
   // anubis.seek('cities', '3');

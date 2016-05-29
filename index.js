@@ -2,30 +2,19 @@ var util = require('util');
 var WebSocket = require('ws');
 var EventEmitter = require('events').EventEmitter;
 
-function AnubisClient(params) {
+function AnubisClient(server) {
   EventEmitter.call(this);
 
-  this.server = params.server;
-  this.topics = params.topics;
-  this.groupId = params.groupId;
+  this.server = server;
 }
 
 AnubisClient.prototype.connect = function() {
   if (this.ws) this.ws.close();
 
   var self = this;
-  var topics = this.topics;
-  var groupId = this.groupId;
   var ws = this.ws = new WebSocket(this.server);
 
   ws.on('open', function() {
-    var connectPayload = JSON.stringify({
-      action: 'connect',
-      topics: topics,
-      groupId: groupId
-    });
-
-    ws.send(connectPayload);
     self.emit('open');
   });
 
@@ -40,7 +29,21 @@ AnubisClient.prototype.connect = function() {
   ws.on('error', function(err) {
     self.emit('error', err);
   });
-},
+}
+
+AnubisClient.prototype.subscribe = function(topics, groupId) {
+  var ws = this.ws;
+
+  if (ws) {
+    var subscribePayload = JSON.stringify({
+      action: 'subscribe',
+      topics: topics,
+      groupId: groupId
+    });
+
+    ws.send(subscribePayload);
+  }
+}
 
 AnubisClient.prototype.publish = function(topic, value) {
   var ws = this.ws;
@@ -54,7 +57,7 @@ AnubisClient.prototype.publish = function(topic, value) {
 
     ws.send(publishPayload);
   }
-},
+}
 
 AnubisClient.prototype.seek = function(topic, offset) {
   var ws = this.ws;
@@ -68,7 +71,7 @@ AnubisClient.prototype.seek = function(topic, offset) {
 
     ws.send(seekPayload);
   }
-},
+}
 
 AnubisClient.prototype.disconnect = function() {
   if (this.ws) {
