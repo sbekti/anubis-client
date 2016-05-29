@@ -28,11 +28,14 @@ anubis.on('open', function() {
 
   anubis.seek('fruits', 'beginning');
   // anubis.seek('fruits', 'end');
-  // anubis.seek('cities', '3');
+  // anubis.seek('cities', 3);
 });
 
 anubis.on('message', function(message) {
   console.log(message);
+
+  // You need to commit manually.
+  anubis.commit(message.topic, message.partition, message.offset);
 });
 
 anubis.on('close', function() {

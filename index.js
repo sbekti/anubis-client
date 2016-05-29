@@ -13,17 +13,32 @@ AnubisClient.prototype.connect = function() {
 
   var self = this;
   var ws = this.ws = new WebSocket(this.server);
+  var pongTimer;
 
   ws.on('open', function() {
     self.emit('open');
+
+    pongTimer = setInterval(function() {
+      var pongPayload = JSON.stringify({
+        event: 'pong'
+      });
+
+      ws.send(pongPayload);
+    }, 25000);
   });
 
   ws.on('message', function(data, flags) {
-    self.emit('message', data);
+    var message = JSON.parse(data);
+
+    if (message.event == 'ping') return;
+
+    self.emit('message', message);
   });
 
   ws.on('close', function() {
     self.emit('close');
+
+    clearInterval(pongTimer);
   });
 
   ws.on('error', function(err) {
@@ -36,7 +51,7 @@ AnubisClient.prototype.subscribe = function(topics, groupId) {
 
   if (ws) {
     var subscribePayload = JSON.stringify({
-      action: 'subscribe',
+      event: 'subscribe',
       topics: topics,
       groupId: groupId
     });
@@ -50,7 +65,7 @@ AnubisClient.prototype.publish = function(topic, value) {
 
   if (ws) {
     var publishPayload = JSON.stringify({
-      action: 'publish',
+      event: 'publish',
       topic: topic,
       value: value
     });
@@ -59,12 +74,27 @@ AnubisClient.prototype.publish = function(topic, value) {
   }
 }
 
+AnubisClient.prototype.commit = function(topic, partition, offset) {
+  var ws = this.ws;
+
+  if (ws) {
+    var commitPayload = JSON.stringify({
+      event: 'commit',
+      topic: topic,
+      partition: partition,
+      offset: offset
+    });
+
+    ws.send(commitPayload);
+  }
+}
+
 AnubisClient.prototype.seek = function(topic, offset) {
   var ws = this.ws;
 
   if (ws) {
     var seekPayload = JSON.stringify({
-      action: 'seek',
+      event: 'seek',
       topic: topic,
       offset: offset
     });
