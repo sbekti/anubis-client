@@ -13,18 +13,9 @@ AnubisClient.prototype.connect = function() {
 
   var self = this;
   var ws = this.ws = new WebSocket(this.server);
-  var pongTimer;
 
   ws.on('open', function() {
     self.emit('open');
-
-    pongTimer = setInterval(function() {
-      var pongPayload = JSON.stringify({
-        event: 'pong'
-      });
-
-      ws.send(pongPayload);
-    }, 25000);
   });
 
   ws.on('message', function(data, flags) {
@@ -37,8 +28,6 @@ AnubisClient.prototype.connect = function() {
 
   ws.on('close', function() {
     self.emit('close');
-
-    clearInterval(pongTimer);
   });
 
   ws.on('error', function(err) {
