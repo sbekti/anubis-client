@@ -28,10 +28,32 @@ AnubisClient.prototype.connect = function() {
 
   ws.on('close', function() {
     self.emit('close');
+
+    if (self.watchDog) {
+      clearInterval(self.watchDog);
+      self.watchDog = null;
+    }
   });
 
   ws.on('error', function(err) {
     self.emit('error', err);
+  });
+
+  ws.on('ping', function(data) {
+    self.lastPingTimestamp = (new Date).getTime();
+    var payload = JSON.parse(data.toString('utf8'));
+
+    if (!self.watchDog) {
+      var watchDogTimeout = payload.watchDogTimeout;
+
+      self.watchDog = setInterval(function() {
+        var currentTimestamp = (new Date).getTime();
+
+        if (currentTimestamp - self.lastPingTimestamp > watchDogTimeout) {
+          self.ws.close();
+        }
+      }, watchDogTimeout);
+    }
   });
 }
 
