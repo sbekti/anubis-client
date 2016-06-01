@@ -21,8 +21,6 @@ AnubisClient.prototype.connect = function() {
   ws.on('message', function(data, flags) {
     var message = JSON.parse(data);
 
-    if (message.event == 'ping') return;
-
     self.emit('message', message);
   });
 
