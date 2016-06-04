@@ -50,6 +50,14 @@ anubis.on('close', function() {
 anubis.on('error', function(err) {
   console.log(err);
 });
+
+anubis.on('assign', function(partitions) {
+  console.log(partitions);
+});
+
+anubis.on('revoke', function(partitions) {
+  console.log(partitions);
+});
 ~~~
 
 ## License

@@ -21,7 +21,17 @@ AnubisClient.prototype.connect = function() {
   ws.on('message', function(data, flags) {
     var message = JSON.parse(data);
 
-    self.emit('message', message);
+    switch (message.event) {
+      case 'message':
+        self.emit('message', message);
+        break;
+      case 'assign':
+        self.emit('assign', message);
+        break;
+      case 'revoke':
+        self.emit('revoke', message);
+        break;
+    }
   });
 
   ws.on('close', function() {
@@ -109,6 +119,18 @@ AnubisClient.prototype.seek = function(topic, offset) {
     });
 
     ws.send(seekPayload);
+  }
+}
+
+AnubisClient.prototype.unsubscribe = function() {
+  var ws = this.ws;
+
+  if (ws) {
+    var unsubscribePayload = JSON.stringify({
+      event: 'unsubscribe'
+    });
+
+    ws.send(unsubscribePayload);
   }
 }
 
