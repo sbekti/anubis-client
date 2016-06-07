@@ -1,12 +1,15 @@
 # anubis-client
+
 Node.js client for [anubis-server](https://github.com/sbekti/anubis-server), a Kafka proxy server over WebSocket.
 
 ## Installation
+
 ~~~shell
 npm install --save anubis-client
 ~~~
 
 ## Example Usage
+
 ~~~javascript
 var AnubisClient = require('anubis-client');
 
@@ -57,6 +60,26 @@ anubis.on('assign', function(partitions) {
 
 anubis.on('revoke', function(partitions) {
   console.log(partitions);
+});
+~~~
+
+## Authentication
+
+~~~javascript
+anubis.on('open', function() {
+  console.log('Connected to Anubis server');
+
+  // Put your access token here.
+  anubis.authenticate('eyJhbGciOiJIUzI1...');
+});
+
+anubis.on('auth', function(result) {
+  if (result.success) {
+    // You can only start subscribing after a successful authentication.
+    anubis.subscribe(['remote_agent_responses'], 'testgroup');
+  } else {
+    console.log('Auth error: ' + result.message);
+  }
 });
 ~~~
 

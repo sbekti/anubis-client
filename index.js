@@ -22,6 +22,9 @@ AnubisClient.prototype.connect = function() {
     var message = JSON.parse(data);
 
     switch (message.event) {
+      case 'auth':
+        self.emit('auth', message);
+        break;
       case 'message':
         self.emit('message', message);
         break;
@@ -34,8 +37,8 @@ AnubisClient.prototype.connect = function() {
     }
   });
 
-  ws.on('close', function() {
-    self.emit('close');
+  ws.on('close', function(code, message) {
+    self.emit('close', code, message);
 
     if (self.watchDog) {
       clearInterval(self.watchDog);
@@ -47,7 +50,7 @@ AnubisClient.prototype.connect = function() {
     self.emit('error', err);
   });
 
-  ws.on('ping', function(data) {
+  ws.on('ping', function(data, flags) {
     self.lastPingTimestamp = (new Date).getTime();
     var payload = JSON.parse(data.toString('utf8'));
 
@@ -63,6 +66,19 @@ AnubisClient.prototype.connect = function() {
       }, watchDogTimeout);
     }
   });
+}
+
+AnubisClient.prototype.authenticate = function(token) {
+  var ws = this.ws;
+
+  if (ws) {
+    var authPayload = JSON.stringify({
+      event: 'auth',
+      token: token
+    });
+
+    ws.send(authPayload);
+  }
 }
 
 AnubisClient.prototype.subscribe = function(topics, groupId) {
