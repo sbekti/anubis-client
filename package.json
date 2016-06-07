@@ -1,6 +1,6 @@
 {
   "name": "anubis-client",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "WebSocket client for Anubis Server",
   "main": "index.js",
   "repository": {
