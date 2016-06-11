@@ -66,19 +66,21 @@ anubis.on('revoke', function(partitions) {
 ## Authentication
 
 ~~~javascript
-anubis.on('open', function() {
-  console.log('Connected to Anubis server');
-
-  // Put your access token here.
-  anubis.authenticate('eyJhbGciOiJIUzI1...');
+var anubis = new AnubisClient({
+  server: 'wss://localhost:5443',
+  token: 'eyJhbGciOiJIUzI1...' // Put your access token here.
 });
 
-anubis.on('auth', function(result) {
-  if (result.success) {
+anubis.connect();
+
+anubis.on('open', function(status) {
+  if (status.success) {
+    console.log('Connected to Anubis server');
+
     // You can only start subscribing after a successful authentication.
-    anubis.subscribe(['remote_agent_responses'], 'testgroup');
+    anubis.subscribe(['fruits', 'cities'], 'testgroup');
   } else {
-    console.log('Auth error: ' + result.message);
+    console.log('Auth error: ' + status.message);
   }
 });
 ~~~

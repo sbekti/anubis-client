@@ -2,10 +2,16 @@ var util = require('util');
 var WebSocket = require('ws');
 var EventEmitter = require('events').EventEmitter;
 
-function AnubisClient(server) {
+function AnubisClient(options) {
   EventEmitter.call(this);
 
-  this.server = server;
+  if (options instanceof Object) {
+    this.server = options.server;
+    this.token = options.token;
+  } else {
+    this.server = options;
+    this.token = '';
+  }
 }
 
 AnubisClient.prototype.connect = function() {
@@ -15,7 +21,12 @@ AnubisClient.prototype.connect = function() {
   var ws = this.ws = new WebSocket(this.server);
 
   ws.on('open', function() {
-    self.emit('open');
+    var authPayload = JSON.stringify({
+      event: 'auth',
+      token: self.token
+    });
+
+    ws.send(authPayload);
   });
 
   ws.on('message', function(data, flags) {
@@ -23,7 +34,7 @@ AnubisClient.prototype.connect = function() {
 
     switch (message.event) {
       case 'auth':
-        self.emit('auth', message);
+        self.emit('open', message);
         break;
       case 'message':
         self.emit('message', message);
@@ -66,19 +77,6 @@ AnubisClient.prototype.connect = function() {
       }, watchDogTimeout);
     }
   });
-}
-
-AnubisClient.prototype.authenticate = function(token) {
-  var ws = this.ws;
-
-  if (ws) {
-    var authPayload = JSON.stringify({
-      event: 'auth',
-      token: token
-    });
-
-    ws.send(authPayload);
-  }
 }
 
 AnubisClient.prototype.subscribe = function(topics, groupId) {
